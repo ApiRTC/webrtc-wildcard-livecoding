@@ -160,7 +160,7 @@ userAgent
 
     userAgent
       .createStream(createStreamOptions)
-      .then((stream) => {http://127.0.0.1:5500/index.html
+      .then((stream) => {
         localStream = stream;
 
         consoleWrite("stream created");
@@ -172,6 +172,8 @@ userAgent
         label.innerHTML = 'You ('+stream.getId()+')';
 
         stream.attachToElement(video);
+
+        addCanvasTracking(video,canvas);
 
         consoleWrite("stream attached to DOM tag");
 
