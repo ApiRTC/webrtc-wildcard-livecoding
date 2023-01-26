@@ -1,22 +1,14 @@
 let apiKey = "myDemoApiKey";
 
-function consoleWrite(text = "") {
-  if (typeof text === Error) text = text.toString();
-
-  console.log(text);
-  return;
-}
-
 let addCanvasTracking = (videoElt, canvasElt) => {
 
   let context = canvasElt.getContext("2d");
 
   let tracker = new tracking.ObjectTracker("face");
+  
   tracker.setInitialScale(4);
   tracker.setStepSize(2);
   tracker.setEdgesDensity(0.1);
-
-  console.log('video id ' + videoElt.id)
 
   tracking.track("#" + videoElt.id, tracker, {});
 
@@ -42,8 +34,6 @@ let addCanvasTracking = (videoElt, canvasElt) => {
   });
 }
 
-consoleWrite("Start:");
-
 let connectedSession;
 let connectedConversation;
 let localStream = null;
@@ -52,17 +42,17 @@ let userAgent = new apiRTC.UserAgent({
   uri: "apiKey:" + apiKey
 });
 
-consoleWrite("userAgent declared");
+console.log("userAgent declared");
 
 userAgent
   .register({
     cloudUrl: "https://cloud.apirtc.com"
   })
   .then((session) => {
-    consoleWrite("UserAgent registered.");
+    console.log("UserAgent registered.");
     // Save session
     connectedSession = session;
-    connectedConversation = connectedSession.getOrCreateConversation("bla2", {
+    connectedConversation = connectedSession.getOrCreateConversation("conversation_name", {
       meshModeEnabled: true
     });
 
@@ -73,34 +63,34 @@ userAgent
         // Add it to me own list copy?
         if (streamInfo.isRemote) {
           // The stream has been published by an other participant.
-          consoleWrite("remote stream published " + streamInfo.streamId);
+          console.log("remote stream published " + streamInfo.streamId);
           connectedConversation
             .subscribeToStream(streamInfo.streamId)
             .then(function (stream) {
-              consoleWrite("subscribeToStream success");
+              console.log("subscribeToStream success");
             })
             .catch(function (err) {
-              consoleWrite("subscribeToStream error", err);
+              console.log("subscribeToStream error", err);
             });
         } else {
           // The stream has been published by me.
-          consoleWrite("local stream published " + streamInfo.streamId);
+          console.log("local stream published " + streamInfo.streamId);
           // Subscribe to it?
         }
       } else if (streamInfo.listEventType === "removed") {
         // A stream has been unpublished.
-        consoleWrite("stream unpublished " + streamInfo.streamId);
+        console.log("stream unpublished " + streamInfo.streamId);
         // Remove it from with own list copy.
 
 
       } else if (streamInfo.listEventType === "updated") {
-        consoleWrite("Stream updated +");
+        console.log("Stream updated +");
         // Properties of the published stream has changed.
       }
     });
 
     connectedConversation.on("streamAdded", function (stream) {
-      consoleWrite("New stream added " + stream.getContact().getId());
+      console.log("New stream added " + stream.getContact().getId());
 
 
       let remoteVideosContainer = document.getElementById('remote-videos-container');
@@ -147,7 +137,7 @@ userAgent
     });
 
     connectedConversation.on("streamRemoved", function (stream) {
-      consoleWrite("Stream removed " + stream.getContact().getId());
+      console.log("Stream removed " + stream.getContact().getId());
       document.getElementById('video-container-' + stream.streamId).remove()
     });
 
@@ -163,7 +153,7 @@ userAgent
       .then((stream) => {
         localStream = stream;
 
-        consoleWrite("stream created");
+        console.log("stream created");
 
         let video = document.getElementById("local-video");
         let canvas = document.getElementById("local-canvas");
@@ -175,12 +165,12 @@ userAgent
 
         addCanvasTracking(video,canvas);
 
-        consoleWrite("stream attached to DOM tag");
+        console.log("stream attached to DOM tag");
 
         connectedConversation
           .join()
           .then((joinResult) => {
-            consoleWrite(
+            console.log(
               "conversation CloudID" +
               connectedConversation.getCloudConversationId() +
               " - Instance Id : " +
@@ -191,10 +181,10 @@ userAgent
               joinResult.mode
             );
 
-            consoleWrite(JSON.stringify(connectedConversation));
+            console.log(JSON.stringify(connectedConversation));
 
             connectedConversation.publish(localStream);
-            consoleWrite(
+            console.log(
               "Local stream published in conversation " +
               connectedConversation.getCloudConversationId() +
               " - Instance Id : " +
@@ -202,13 +192,13 @@ userAgent
             );
           })
           .catch((err) => {
-            consoleWrite("Error : " + err);
+            console.log("Error : " + err);
           });
       })
       .catch((err) => {
-        consoleWrite("error : " + err);
+        console.log("error : " + err);
       });
   })
   .catch((err) => {
-    consoleWrite("Error User Agent : " + JSON.stringify(err));
+    console.log("Error User Agent : " + JSON.stringify(err));
   });
