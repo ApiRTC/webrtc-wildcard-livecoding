@@ -83,7 +83,7 @@ userAgent
         let video = document.getElementById("local-video");
 
         let label = document.getElementById("local-video-label");
-        label.innerHTML = 'You ('+stream.getId()+')';
+        label.innerHTML = 'You ('+ userAgent.getUsername() +')';
 
         stream.attachToElement(video);
 
