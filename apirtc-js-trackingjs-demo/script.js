@@ -1,38 +1,4 @@
-let apiKey = "myDemoApiKey";
-
-let addCanvasTracking = (videoElt, canvasElt) => {
-
-  let context = canvasElt.getContext("2d");
-
-  let tracker = new tracking.ObjectTracker("face");
-  
-  tracker.setInitialScale(4);
-  tracker.setStepSize(2);
-  tracker.setEdgesDensity(0.1);
-
-  tracking.track("#" + videoElt.id, tracker, {});
-
-  tracker.on("track", function (event) {
-    context.clearRect(0, 0, canvasElt.width, canvasElt.height);
-
-    event.data.forEach(function (rect) {
-      context.strokeStyle = "#a64ceb";
-      context.strokeRect(rect.x, rect.y, rect.width, rect.height);
-      context.font = "11px Helvetica";
-      context.fillStyle = "#fff";
-      context.fillText(
-        "x: " + rect.x + "px",
-        rect.x + rect.width + 5,
-        rect.y + 11
-      );
-      context.fillText(
-        "y: " + rect.y + "px",
-        rect.x + rect.width + 5,
-        rect.y + 22
-      );
-    });
-  });
-}
+let apiKey = "myDemoApiKey"; // <-- Insert your own API Key here (free plan on https://cloud.apirtc.com)
 
 let connectedSession;
 let connectedConversation;
@@ -93,46 +59,74 @@ userAgent
       console.log("New stream added " + stream.getContact().getId());
 
 
+      //--- Add a video element and a canvas element for each new participant joining the conversation
       let remoteVideosContainer = document.getElementById('remote-videos-container');
 
-      let addVideoStuff = ((videosContainerDivElement) => {
+      let containerElt = document.createElement('div');
+      containerElt.className = 'video-container';
+      containerElt.id = 'video-container-' + stream.getId();
 
-        let containerElt = document.createElement('div');
-        containerElt.className = 'video-container';
-        containerElt.id = 'video-container-' + stream.getId();
+      let videoElt = document.createElement('video');
+      videoElt.className = 'video-element';
+      videoElt.id = 'remote-video-' + stream.getId();
+      videoElt.autoplay = true;
+      videoElt.width = '320px';
+      videoElt.height = '240px';
 
-        let videoElt = document.createElement('video');
-        videoElt.className = 'video-element';
-        videoElt.id = 'remote-video-' + stream.getId();
-        videoElt.autoplay = true;
-        videoElt.width = '320px';
-        videoElt.height = '240px';
+      stream.attachToElement(videoElt);
 
-        stream.attachToElement(videoElt);
+      let canvasElt = document.createElement('canvas');
+      canvasElt.className = 'video-element';
+      canvasElt.width = '320';
+      canvasElt.height = '240';
 
-        let canvasElt = document.createElement('canvas');
-        canvasElt.className = 'video-element';
-        canvasElt.width = '320';
-        canvasElt.height = '240';
+      let labelElt = document.createElement('span');
+      labelElt.className = 'video-label video-element';
+      labelElt.innerHTML = 'Remote (' + stream.getContact().getUsername() + ')'
 
-        let labelElt = document.createElement('span');
-        labelElt.className = 'video-label video-element';
-        labelElt.innerHTML = 'Remote ' + stream.getId()
+      containerElt.appendChild(videoElt)
+      containerElt.appendChild(canvasElt)
+      containerElt.appendChild(labelElt)
 
+      remoteVideosContainer.appendChild(containerElt)
 
-        containerElt.appendChild(videoElt)
-        containerElt.appendChild(canvasElt)
-        containerElt.appendChild(labelElt)
+      //----
+      //---- Start tracking face on this new video element
 
-        videosContainerDivElement.appendChild(containerElt)
+      let context = canvasElt.getContext("2d");
 
-        addCanvasTracking(videoElt, canvasElt)
+      // Use the tracking module
+      let tracker = new tracking.ObjectTracker("face");
 
+      //attach the tracker the video element
+      tracking.track("#" + videoElt.id, tracker, {});
 
+      //each time the track event is fired
+      tracker.on("track", function (event) {
+
+        //clear the canvas of all rectangles
+        context.clearRect(0, 0, canvasElt.width, canvasElt.height);
+
+        //For each face detected
+        event.data.forEach(function (rect) {c
+
+          //Draw a rectangle and the coordinates
+          context.strokeStyle = "#a64ceb";
+          context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+          context.font = "11px Helvetica";
+          context.fillStyle = "#fff";
+          context.fillText(
+            "x: " + rect.x + "px",
+            rect.x + rect.width + 5,
+            rect.y + 11
+          );
+          context.fillText(
+            "y: " + rect.y + "px",
+            rect.x + rect.width + 5,
+            rect.y + 22
+          );
+        });
       });
-
-      addVideoStuff(remoteVideosContainer)
-
 
     });
 
@@ -156,14 +150,11 @@ userAgent
         console.log("stream created");
 
         let video = document.getElementById("local-video");
-        let canvas = document.getElementById("local-canvas");
 
         let label = document.getElementById("local-video-label");
-        label.innerHTML = 'You ('+stream.getId()+')';
+        label.innerHTML = 'You (' + userAgent.getUsername() + ')';
 
         stream.attachToElement(video);
-
-        addCanvasTracking(video,canvas);
 
         console.log("stream attached to DOM tag");
 
