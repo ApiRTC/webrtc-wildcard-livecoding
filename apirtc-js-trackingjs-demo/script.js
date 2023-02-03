@@ -108,7 +108,7 @@ userAgent
         context.clearRect(0, 0, canvasElt.width, canvasElt.height);
 
         //For each face detected
-        event.data.forEach(function (rect) {c
+        event.data.forEach(function (rect) {
 
           //Draw a rectangle and the coordinates
           context.strokeStyle = "#a64ceb";
