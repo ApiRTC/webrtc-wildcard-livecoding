@@ -58,7 +58,6 @@ userAgent
     connectedConversation.on("streamAdded", function (stream) {
       console.log("New stream added " + stream.getContact().getId());
 
-
       //--- Add a video element and a canvas element for each new participant joining the conversation
       let remoteVideosContainer = document.getElementById('remote-videos-container');
 
@@ -90,6 +89,8 @@ userAgent
 
       remoteVideosContainer.appendChild(containerElt)
 
+
+      // Source code on 
       //----
       //---- Start tracking face on this new video element
 
@@ -108,7 +109,7 @@ userAgent
         context.clearRect(0, 0, canvasElt.width, canvasElt.height);
 
         //For each face detected
-        event.data.forEach(function (rect) {c
+        event.data.forEach(function (rect) {
 
           //Draw a rectangle and the coordinates
           context.strokeStyle = "#a64ceb";
