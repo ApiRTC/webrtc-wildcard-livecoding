@@ -1,8 +1,14 @@
 let apiKey = "myDemoApiKey"; //Insert your own API Key here - Find it at https://cloud.apirtc.com/enterprise/api (free plan available)
 
+
+apiRTC.setLogLevel(10);
+
 let connectedSession;
 let connectedConversation;
 let localStream = null;
+
+let currentSpeaker = "";
+let previousSpeaker = "";
 
 let userAgent = new apiRTC.UserAgent({
   uri: "apiKey:" + apiKey
@@ -16,6 +22,10 @@ userAgent
   })
   .then((session) => {
     console.log("UserAgent registered.");
+
+
+    userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
+
     // Save session
     connectedSession = session;
     connectedConversation = connectedSession.getOrCreateConversation("conversation_name", {
@@ -58,6 +68,10 @@ userAgent
     connectedConversation.on("streamAdded", function (stream) {
       console.log("New stream added " + stream.getContact().getId());
 
+      stream.on('audioAmplitudeInfo', audioAmplitudeInfos => {
+        console.log(stream.streamId + " is speaking "+ audioAmplitudeInfos)
+      })
+
       stream.addInDiv('remote-videos-container', 'remote-video-' + stream.streamId, {}, true);
 
     });
@@ -65,7 +79,17 @@ userAgent
     connectedConversation.on("streamRemoved", function (stream) {
       console.log("Stream removed " + stream.getContact().getId());
       stream.removeFromDiv('remote-videos-container', 'remote-video-' + stream.streamId);
-    });
+    });   
+
+    connectedConversation.on('audioAmplitude', amplitudeInfo => {
+       if (amplitudeInfo.isSpeaking) {
+         previousSpeaker = currentSpeaker
+         currentSpeaker = connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername()
+         console.log("Currently speaking : " + connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername())
+       }
+
+       console.log("Currently speaking : " + connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername())
+     });
 
     let createStreamOptions = {};
     createStreamOptions.constraints = {
@@ -133,7 +157,7 @@ async function init() {
   partialContainer.textContent = "Loading...";
 
   const channel = new MessageChannel();
-  const model = await Vosk.createModel('apirtc-js-voskWASM-demo/vosk-model-small-en-us-0.15.tar.gz');
+  const model = await Vosk.createModel('apirtc-js-voskWASM-remoteparticipants-demo/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
 
   const sampleRate = 44100;
@@ -156,18 +180,6 @@ async function init() {
   });
 
   partialContainer.textContent = "Ready";
-
-  /*     const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: false,
-          audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              channelCount: 1,
-              sampleRate
-          },
-      });
-   */
-
 
   const audioContext = new AudioContext();
 

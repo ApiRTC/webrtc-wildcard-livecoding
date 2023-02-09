@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ApiRTC + Vosk WASM</title>
+  <meta charset="UTF-8" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .videos-container {
+      width: 100%;
+      height: auto;
+      clear: both;
+    }
+
+    .video-container {
+      width: 320px;
+      height: 240px;
+      position: relative;
+      float: left;
+    }
+
+    .video-element {
+      width: 320px;
+      height: 240px;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+    }
+
+    .video-label {
+      z-index: 100;
+      background-color: black;
+      color: white;
+      height: auto;
+      width: auto;
+      padding: 5px 10px 5px 10px;
+      border-radius: 5px;
+      font-family: sans-serif;
+      margin: 5px 5px;
+    }
+
+    .video-participants {
+      padding: 0;
+      margin: 0;
+      width: 50vw;
+      height: 100vh;
+      float: left;
+    }
+
+    .notepad-panel {
+      padding: 0;
+      margin: 0;
+      width: 49vw;
+      height: 100vh;
+      float: left;
+      border-left: 1px solid red;
+    }
+
+    #notepad-area {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="video-participants">
+    <div class="videos-container">
+      <div class="video-container">
+        <video id="local-video" class="video-element" width="320" height="240" preload autoplay loop muted></video>
+        <span id="local-video-label" class="video-label video-element">You </span>
+      </div>
+    </div>
+
+    <div class="videos-container" id="remote-videos-container">
+    </div>
+  </div>
+  <div class="notepad-panel">
+    <button id="trigger">Start transcription</button>
+    <blockquote id="recognition-result" contenteditable="true"><span id="partial"></span></blockquote>
+  </div>
+
+  <script type="text/javascript" src="https://cloud.apirtc.com/apiRTC/apiRTC-latest.min.js"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js"></script>
+  <script src="script.js"></script>
+
+
+</body>
+
+</html>
