@@ -20,44 +20,12 @@ theme: gaia
 
 ---
 
-# News
-## Broadcast your netradio with LiquidSoap
-https://www.liquidsoap.info
-![](assets/liquid_soap.png)
+# Back from FOSDEM '23
 
----
-## Security briefing 
-https://www.rtcsec.com/newsletter/2023-01-rtcsec-news/
-![](assets/security_briefing.png)
-
----
-
-## Coturn's leaders interview - Gustavo Garcia and Pavel Punsky 
-https://webrtchacks.com/coturn-no-time-to-die-qa-with-new-project-leads/
-
-- Some Background on coturn
-- “Is the project dead?” The community responds
-- Recent updates
-- Coturn’s roadmap
-- Scaling coturn
-- Changing STUN and TURN standards
-- Coturn still needs the community’s help
-
-by Chad Hart on WebRTCHacks.com
-
----
-## Prism Router - POC of a WebTransport router forwarding data across mulitple endpoints
-by Gustavo Garcia
-Demo: https://prismrouter.com/
-Code: https://github.com/ggarber/prism
-![](assets/prism_router.png)
-
----
-## FOSDEM DevRoom Realtime Communications
-This weekend (4-5 Feb)!!!
-https://fosdem.org/2023/schedule/track/real_time_communications/
-![900px](assets/RTCDevRoom.png)
-
+## Dan Jenkins
+## Janus
+## Architecturing Jitsi for 10 000 participants
+ 
 ---
 
 ## Find these resources on
