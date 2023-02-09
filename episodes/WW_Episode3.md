@@ -3,7 +3,7 @@ marp: true
 theme: gaia
 ---
 
-![bg](./assets/webrtcwildcard-banner.png)
+![bg](./assets/webrtcwildcard-banner_ep3.png)
 
 ---
 # Romain Vailleux
