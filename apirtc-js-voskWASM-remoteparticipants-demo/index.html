@@ -52,24 +52,27 @@
       float: left;
     }
 
-    .notepad-panel {
+    #notepad-panel{
+      display:block;
+    }
+
+    #notes-panel{
+      display:block;
+    }
+
+    .panel {
       padding: 0;
       margin: 0;
       width: 49vw;
-      height: 100vh;
+      height: 49vh;
       float: left;
       border-left: 1px solid red;
-    }
-
-    #notepad-area {
-      width: 100%;
-      height: 100%;
-      border: none;
     }
   </style>
 </head>
 
 <body>
+  <p id="current_speakers_id"></p>
   <div class="video-participants">
     <div class="videos-container">
       <div class="video-container">
@@ -81,12 +84,19 @@
     <div class="videos-container" id="remote-videos-container">
     </div>
   </div>
-  <div class="notepad-panel">
-    <button id="trigger">Start transcription</button>
-    <blockquote id="recognition-result" contenteditable="true"><span id="partial"></span></blockquote>
-  </div>
 
-  <script type="text/javascript" src="https://cloud.apirtc.com/apiRTC/apiRTC-latest.min.js"></script>
+  <button id="trigger">Start transcription</button>
+  <button id="end-transcription">End the meeting and get the notes</button>
+  <div id="notepad-panel" class="panel">
+    <blockquote id="recognition-result" contenteditable="true">
+        <span id="partial"></span>
+    </blockquote>
+  </div>
+  <div id="notes-panel" class="panel">
+    
+  </div>
+  <script type="text/javascript" src="./mysecrets.env.js"></script>
+  <script type="text/javascript" src="https://cdn.apirtc.com/apiRTC/v4.6/apiRTC-latest.min.js"></script>
   <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js"></script>
   <script src="script.js"></script>
 

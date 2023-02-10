@@ -1,14 +1,13 @@
-let apiKey = "myDemoApiKey"; //Insert your own API Key here - Find it at https://cloud.apirtc.com/enterprise/api (free plan available)
 
-
-apiRTC.setLogLevel(10);
+//apiRTC.setLogLevel(10);
 
 let connectedSession;
 let connectedConversation;
-let localStream = null;
+let streamMap = {};
+let localStream;
 
 let currentSpeaker = "";
-let previousSpeaker = "";
+let previousSpeaker = "prevSpeaker";
 
 let userAgent = new apiRTC.UserAgent({
   uri: "apiKey:" + apiKey
@@ -24,12 +23,12 @@ userAgent
     console.log("UserAgent registered.");
 
 
-    userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
+    userAgent.enableActiveSpeakerDetecting(true, { threshold: 30 });
 
     // Save session
     connectedSession = session;
     connectedConversation = connectedSession.getOrCreateConversation("conversation_name", {
-      meshModeEnabled: true
+      //meshModeEnabled: true
     });
 
     connectedConversation.on("streamListChanged", function (streamInfo) {
@@ -67,29 +66,39 @@ userAgent
 
     connectedConversation.on("streamAdded", function (stream) {
       console.log("New stream added " + stream.getContact().getId());
-
-      stream.on('audioAmplitudeInfo', audioAmplitudeInfos => {
-        console.log(stream.streamId + " is speaking "+ audioAmplitudeInfos)
-      })
-
+      streamMap[stream.streamId] = stream;
       stream.addInDiv('remote-videos-container', 'remote-video-' + stream.streamId, {}, true);
 
     });
 
     connectedConversation.on("streamRemoved", function (stream) {
       console.log("Stream removed " + stream.getContact().getId());
+
+      delete streamMap[stream.streamId]
+
       stream.removeFromDiv('remote-videos-container', 'remote-video-' + stream.streamId);
-    });   
+    });
 
     connectedConversation.on('audioAmplitude', amplitudeInfo => {
-       if (amplitudeInfo.isSpeaking) {
-         previousSpeaker = currentSpeaker
-         currentSpeaker = connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername()
-         console.log("Currently speaking : " + connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername())
-       }
+      if (amplitudeInfo.isSpeaking && transcriptionActivated) {
 
-       console.log("Currently speaking : " + connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername())
-     });
+        currentSpeaker = amplitudeInfo.streamId == localStream.streamId ? userAgent.getUsername() : connectedConversation.getStreamInfo(amplitudeInfo.streamId).contact.getUsername()
+
+
+        if (previousSpeaker !== currentSpeaker) {
+          const newSpeakerHandle = document.createElement('span')
+          newSpeakerHandle.className = "speaker-handler"
+          newSpeakerHandle.textContent = " > " + currentSpeaker + ": "
+
+          document.getElementById('recognition-result').insertBefore(document.createElement('br'), document.getElementById('partial'))
+          document.getElementById('recognition-result').insertBefore(newSpeakerHandle, document.getElementById('partial'))
+        }
+
+        console.log("localid : " + localStream.streamId + " talking: " + amplitudeInfo.streamId)
+        document.getElementById('current_speakers_id').innerText = currentSpeaker
+      }
+
+    });
 
     let createStreamOptions = {};
     createStreamOptions.constraints = {
@@ -150,6 +159,12 @@ userAgent
     console.log("Error User Agent : " + JSON.stringify(err));
   });
 
+
+let audioContext = new AudioContext();
+let recognizerProcessor = null;
+let transcriptionActivated = false;
+
+
 async function init() {
   const resultsContainer = document.getElementById('recognition-result');
   const partialContainer = document.getElementById('partial');
@@ -160,7 +175,7 @@ async function init() {
   const model = await Vosk.createModel('apirtc-js-voskWASM-remoteparticipants-demo/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
 
-  const sampleRate = 44100;
+  const sampleRate = 48000;
 
   const recognizer = new model.KaldiRecognizer(sampleRate);
   recognizer.setWords(true);
@@ -174,28 +189,80 @@ async function init() {
 
   recognizer.on("partialresult", (message) => {
     const partial = message.result.partial;
-
     partialContainer.textContent = partial;
 
   });
 
   partialContainer.textContent = "Ready";
-
-  const audioContext = new AudioContext();
+  transcriptionActivated = true;
 
   await audioContext.audioWorklet.addModule('recognizer-processor.js')
-  const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
+  recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
   recognizerProcessor.port.postMessage({ action: 'init', recognizerId: recognizer.id }, [channel.port2])
   recognizerProcessor.connect(audioContext.destination);
+
+
+  for (streamId in streamMap) {
+    const source = audioContext.createMediaStreamSource(streamMap[streamId].getData());
+    source.connect(recognizerProcessor);
+  }
 
   const source = audioContext.createMediaStreamSource(localStream.getData());
   source.connect(recognizerProcessor);
 }
+
+function OpenaiFetchAPI() {
+  console.log("Calling GPT3")
+  var url = "https://api.openai.com/v1/completions";
+  var bearer = 'Bearer ' + openAi_key
+
+  const clearedContent = document.getElementById('recognition-result').innerHTML.replace("<span>", "").replace("</span>","").replace("<br/>","")
+
+  // const prompt = "Get a summary a meeting represented by the conversation below: begin with a list of participants to this conversation, followed with the list of topics discussed, and finishing with a list of decisions made and actions to be taken. Format as an innerHTML of the body tag with the main parts titles as H1 tags:  > guest-e2c54c2f-e1b1: i think we should go forward on attending this conference, what do you think?  > guest-50b0f439-ccfb: yes agreed, but only if the traveling expenses are paid by the company.  > guest-e2c54c2f-e1b1: ok, let's do that then"
+  const prompt = "Get a summary a meeting represented by the conversation below: begin with a list of participants to this conversation, followed with the list of topics discussed, and finishing with a list of decisions made and actions to be taken. Format as an innerHTML of the body tag with the main parts titles as H1 tags:  "+ clearedContent
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': bearer,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      "model": "text-davinci-003",
+      "prompt": prompt,
+      "max_tokens": 256,
+      "temperature": 0,
+      "top_p": 1,
+      "n": 1,
+      "stream": false
+    })
+
+  }).then(response => {
+
+    return response.json()
+
+  }).then(data => {
+
+    document.getElementById('notes-panel').innerHTML = data['choices'][0].text
+
+  })
+    .catch(error => {
+      console.log('Something bad happened ' + error)
+    });
+
+}
+
 
 window.onload = () => {
   const trigger = document.getElementById('trigger');
   trigger.onmouseup = () => {
     trigger.disabled = true;
     init();
+  };
+
+  const endTranscriptionButton = document.getElementById('end-transcription');
+  endTranscriptionButton.onmouseup = () => {
+    //endTranscriptionButton.disabled = true;
+    OpenaiFetchAPI()
   };
 }
