@@ -3,6 +3,12 @@
 Download the model library in your local focal
 ```wget https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz```
 
+# Get Apikeys
+- ApiRTC: https://cloud.apirtc.com/enterprise/api
+- OpenAI: https://platform.openai.com/account/api-keys
+
+Set up `apiKey` (ApiRTC) and `openAiKey` variables with the Apikeys in a mysecrets.env.js file.
+
 ## Start
 ```npx http-server```
 

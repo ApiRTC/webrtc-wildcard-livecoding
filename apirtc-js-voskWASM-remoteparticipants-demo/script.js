@@ -1,5 +1,6 @@
 
 //apiRTC.setLogLevel(10);
+// define apiKey and openAiKey variables in a mysecrets.env.js file
 
 let connectedSession;
 let connectedConversation;
@@ -214,7 +215,7 @@ async function init() {
 function OpenaiFetchAPI() {
   console.log("Calling GPT3")
   var url = "https://api.openai.com/v1/completions";
-  var bearer = 'Bearer ' + openAi_key
+  var bearer = 'Bearer ' + openAiKey
 
   const clearedContent = document.getElementById('recognition-result').innerHTML.replace("<span>", "").replace("</span>","").replace("<br/>","")
 
