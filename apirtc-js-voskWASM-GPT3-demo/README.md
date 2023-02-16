@@ -1,4 +1,4 @@
-# ApiRTC + Vosk WASM Demo
+# ApiRTC + Vosk WASM + OpenAI GPT3 Demo
 ## Setup environment
 Download the model library in your local focal
 ```wget https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz```
