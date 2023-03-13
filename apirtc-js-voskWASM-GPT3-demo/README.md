@@ -8,8 +8,12 @@ Download the model library in your local focal
 - OpenAI: https://platform.openai.com/account/api-keys
 
 Set up `apiKey` (ApiRTC) and `openAiKey` variables with the Apikeys in a mysecrets.env.js file.
+```javascript
+var apiKey = "<YOUR_APIRTC_KEY>"
+var openAiKey = "<YOUR_OPENAI_KEY>"
+```
 
 ## Start
-```npx http-server```
+```npx live-server```
 
 Open a browser and navigate to http://127.0.0.1:8080
